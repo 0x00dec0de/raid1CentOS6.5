@@ -1,4 +1,3 @@
-
 #   Device Boot      Start         End      Blocks   Id  System
 #/dev/sda1   *           1          13      104391   83  Linux                /boot
 #/dev/sda2              14         274     2096482+  83  Linux                /tmp
@@ -71,3 +70,11 @@ reboot
 mdadm /dev/md0 -a /dev/sda1
 mdadm /dev/md1 -a /dev/sda2
 mdadm /dev/md2 -a /dev/sda5
+
+
+# end if boot sync 
+grub 
+  root (hd0,0)
+  setup (hd0)
+
+
