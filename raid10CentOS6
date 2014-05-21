@@ -1,0 +1,82 @@
+=================================================================================================
+# OLD TABLE 
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048          206847   100.0 MiB   EF00  
+   2          206848       299999231   143.0 GiB   0700  
+   3       299999232       308387839   4.0 GiB     8200  
+   4       308387840       312580095   2.0 GiB     0700  
+
+
+
+# NEW TABLE 
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048          206847   100.0 MiB   EF00  EFI System   /boot  md0
+   2          206848        63121407   30.0 GiB    FD00  Linux RAID   /      md1
+   3        63121408       299999231   113.0 GiB   FD00  Linux RAID   /home  md2
+   4       299999232       308387839   4.0 GiB     8200  Linux swap   swap 
+   5       308387840       312581774   2.0 GiB     FD00  Linux RAID   /tmp   md3
+
+
+sgdisk -R /dev/sdc /dev/sdb 
+sgdisk -G /dev/sdc 
+sgdisk -R /dev/sdd /dev/sdb 
+sgdisk -G /dev/sdd 
+
+
+modprobe linear
+modprobe raid0
+modprobe raid1
+modprobe raid10
+
+
+
+mdadm --create /dev/md0 --level 1 --bitmap=internal --bitmap-chunk=131072 --metadata=0.90 --raid-devices=4 missing /dev/sdb1 /dev/sdc1 /dev/sdd1
+mdadm --create /dev/md1 --level=1 --bitmap=internal --bitmap-chunk=131072 --raid-devices=4 missing /dev/sdb2 /dev/sdc2 /dev/sdd2
+mdadm --create /dev/md2 --level=10 --bitmap=internal --bitmap-chunk=131072 --raid-devices=4 missing /dev/sdb3 /dev/sdc3 /dev/sdd3
+mdadm --create /dev/md3 --level=1 --bitmap=internal --bitmap-chunk=131072 --raid-devices=4 missing /dev/sdb5 /dev/sdc5 /dev/sdd5
+
+
+
+mkfs.ext2 /dev/md0
+mkfs.ext4 /dev/md1
+mkfs.ext4 /dev/md2
+mkfs.ext4 /dev/md3
+mkswap /dev/sdb4
+mkswap /dev/sdc4
+mkswap /dev/sdd4
+
+mdadm --detail --scan > /etc/mdadm.conf
+
+cp /boot/grub/grub.conf /boot/grub/grub.conf.bk
+cp /etc/fstab /etc/fstab.bk
+
+# Edit selinux, fstab, grub.cfg
+
+mv /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.old
+dracut --mdadmconf --force /boot/initramfs-$(uname -r).img $(uname -r)
+
+mkdir /mnt/raid
+mount /dev/md0 /mnt/raid
+
+cd /boot; find . -depth | cpio -pmd /mnt/raid
+sync
+umount /mnt/raid
+mount /dev/md1 /mnt/raid
+cd / ; find . -depth -xdev | grep -v '^\./tmp/' | cpio -pmd /mnt/raid
+chmod 1777 /mnt/raid/tmp
+chmod +s /mnt/raid/tmp
+sync
+umount /mnt/raid
+
+grub 
+
+mdadm /dev/md0 -a /dev/sda1
+mdadm /dev/md1 -a /dev/sda2
+mdadm /dev/md2 -a /dev/sda3
+mdadm /dev/md3 -a /dev/sda5
+
+# check sync 
+
+grub
