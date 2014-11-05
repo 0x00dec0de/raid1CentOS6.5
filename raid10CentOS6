@@ -32,7 +32,7 @@ modprobe raid10
 
 
 
-mdadm --create /dev/md0 --level 1 --bitmap=internal --bitmap-chunk=131072 --metadata=0.90 --raid-devices=4 missing /dev/sdb1 /dev/sdc1 /dev/sdd1
+mdadm --create /dev/md0 --level=1 --bitmap=internal --bitmap-chunk=131072 --metadata=0.90 --raid-devices=4 missing /dev/sdb1 /dev/sdc1 /dev/sdd1
 mdadm --create /dev/md1 --level=1 --bitmap=internal --bitmap-chunk=131072 --raid-devices=4 missing /dev/sdb2 /dev/sdc2 /dev/sdd2
 mdadm --create /dev/md2 --level=10 --bitmap=internal --bitmap-chunk=131072 --raid-devices=4 missing /dev/sdb3 /dev/sdc3 /dev/sdd3
 mdadm --create /dev/md3 --level=1 --bitmap=internal --bitmap-chunk=131072 --raid-devices=4 missing /dev/sdb5 /dev/sdc5 /dev/sdd5
