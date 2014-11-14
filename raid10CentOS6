@@ -53,6 +53,7 @@ cp /boot/grub/grub.conf /boot/grub/grub.conf.bk
 cp /etc/fstab /etc/fstab.bk
 
 # Edit selinux, fstab, grub.cfg
+cd /boot/
 
 mv /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.old
 dracut --mdadmconf --force /boot/initramfs-$(uname -r).img $(uname -r)
@@ -65,8 +66,7 @@ sync
 umount /mnt/raid
 mount /dev/md1 /mnt/raid
 cd / ; find . -depth -xdev | grep -v '^\./tmp/' | cpio -pmd /mnt/raid
-chmod 1777 /mnt/raid/tmp
-chmod +s /mnt/raid/tmp
+chmod 777 /mnt/raid/tmp
 sync
 umount /mnt/raid
 
