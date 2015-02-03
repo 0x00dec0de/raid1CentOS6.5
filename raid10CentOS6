@@ -71,12 +71,26 @@ sync
 umount /mnt/raid
 
 grub 
+  root (hd1,0)
+  setup (hd1)
+  root (hd0,0)
+  setup (hd0)
+  
+dmsetup remove_all
+yum install parted
+sfdisk -d /dev/sdb | sfdisk -f /dev/sda
+partprobe /dev/sda
 
 mdadm /dev/md0 -a /dev/sda1
 mdadm /dev/md1 -a /dev/sda2
 mdadm /dev/md2 -a /dev/sda3
 mdadm /dev/md3 -a /dev/sda5
 
-# check sync 
+# check sync boot 
+grub
+  root (hd1,0)
+  setup (hd1)
+  root (hd0,0)
+  setup (hd0)
 
 grub
