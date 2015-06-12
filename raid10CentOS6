@@ -52,11 +52,25 @@ mdadm --detail --scan > /etc/mdadm.conf
 cp /boot/grub/grub.conf /boot/grub/grub.conf.bk
 cp /etc/fstab /etc/fstab.bk
 
-# Edit selinux, fstab, grub.cfg
+# Edit selinux, fstab
+
+grubby --update-kernel=ALL \
+       --args="root=/dev/md1 selinux=0 fastboot" \
+       --remove-args="rd_NO_MD" 
+
+
+
 cd /boot/
 
-mv /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.old
-dracut --mdadmconf --force /boot/initramfs-$(uname -r).img $(uname -r)
+for i in `ls /lib/modules/`
+do  
+   dracut -f --mdadmconf /boot/initramfs-$i.img $i  
+done
+
+
+#mv /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.old
+#dracut --mdadmconf --force /boot/initramfs-$(uname -r).img $(uname -r)
+
 
 mkdir /mnt/raid
 mount /dev/md0 /mnt/raid
